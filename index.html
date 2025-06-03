@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>국내 여행 추천</title>
+<style>
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+  }
+  body {
+    font-family: 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #fff;
+    color: #111;
+    line-height: 1.6;
+  }
+  nav {
+    display: flex;
+    gap: 30px;
+    padding: 20px 50px;
+    border-bottom: 1.5px solid #000;
+    user-select: none;
+    background: #fff;
+  }
+  nav > .menu {
+    position: relative;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #222;
+    cursor: pointer;
+    padding: 10px 5px;
+    transition: color 0.3s, border-bottom 0.3s;
+  }
+  nav > .menu:hover,
+  nav > .menu.active {
+    color: #000;
+    border-bottom: 3px solid #000;
+  }
+  nav > .menu > .submenu {
+    display: none;
+    position: absolute;
+    top: 45px;
+    left: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    min-width: 140px;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.07);
+    z-index: 100;
+  }
+  nav > .menu:hover > .submenu {
+    display: block;
+  }
+  nav > .menu > .submenu > div {
+    padding: 10px 18px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+  }
+  nav > .menu > .submenu > div:hover {
+    background-color: #f3f3f3;
+  }
+  main {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 0 40px 80px 40px;
+  }
+  main h2 {
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 25px;
+    color: #111;
+  }
+  .card {
+    background: #fafafa;
+    border-radius: 12px;
+    padding: 25px 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+  }
+  .card ul {
+    list-style: inside disc;
+    color: #444;
+    font-weight: 500;
+  }
+  .card ul li {
+    margin-bottom: 10px;
+  }
+  .intro-text {
+    font-weight: 400;
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 40px;
+  }
+  a {
+    color: #222;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+
+  /* 후기 페이지 스타일 */
+  #reviewForm {
+    margin-top: 30px;
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  #reviewForm label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+  }
+  #reviewForm input[type="text"],
+  #reviewForm textarea,
+  #reviewForm select {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    resize: vertical;
+  }
+  #reviewForm button {
+    background: #222;
+    color: white;
+    padding: 10px 20px;
+    font-weight: 700;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  #reviewForm button:hover {
+    background: #444;
+  }
+  .reviews-list {
+    margin-top: 30px;
+  }
+  .review-item {
+    background: #fafafa;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+  .review-item .stars {
+    color: #f5b301;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .review-item .author {
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .review-item .text {
+    white-space: pre-wrap;
+    color: #333;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="menu" id="seasonMenu">
+    계절
+    <div class="submenu">
+      <div data-season="봄">봄</div>
+      <div data-season="여름">여름</div>
+      <div data-season="가을">가을</div>
+      <div data-season="겨울">겨울</div>
+    </div>
+  </div>
+
+  <div class="menu" id="regionMenu">
+    지역
+    <div class="submenu">
+      <div data-region="서울">서울</div>
+      <div data-region="강원">강원</div>
+      <div data-region="경상">경상</div>
+      <div data-region="전라">전라</div>
+      <div data-region="제주">제주</div>
+    </div>
+  </div>
+
+  <div class="menu" id="aiRecommendMenu">AI 추천지</div>
+  <div class="menu" id="aboutMenu">여행사 소개</div>
+  <div class="menu" id="reservationMenu">예약 안내</div>
+  <div class="menu" id="reviewMenu">후기</div>
+</nav>
+
+<main>
+  <div id="content">
+    <h2>국내 여행 추천에 오신 걸 환영합니다!</h2>
+    <p class="intro-text">상단 메뉴에서 계절 또는 지역을 선택해 보세요. 각 메뉴에서는 해당하는 추천 여행지를 단독으로 보여드립니다.<br/>
+    AI 추천지는 계절과 지역을 함께 고려해 특별한 여행지를 제안합니다.</p>
+  </div>
+</main>
+
+<script>
+  const content = document.getElementById('content');
+  const menus = document.querySelectorAll('nav > .menu');
+
+  const recommendations = {
+    봄: ['여의도 벚꽃길', '남산공원', '창덕궁', '춘천 호반길', '강릉 정동진', '속초 설악산'],
+    여름: ['한강 공원', '롯데월드', '남산 타워', '강릉 경포대', '속초 해수욕장', '양양 낙산사'],
+    가을: ['남산 단풍길', '북한산 국립공원', '창경궁', '평창 효석문화제', '정선 5일장', '영월 단종릉'],
+    겨울: ['남산 눈꽃축제', '광화문 광장', '한강 얼음썰매장', '평창 스키장', '홍천 비발디파크', '강릉 안목해변'],
+
+    서울: ['여의도', '남산', '광화문', '한강공원'],
+    강원: ['춘천', '강릉', '속초', '평창'],
+    경상: ['부산 해운대', '경주', '울산 대왕암', '양산'],
+    전라: ['순천만', '여수', '광주 무등산', '담양'],
+    제주: ['한라산', '성산 일출봉', '협재 해변', '우도']
+  };
+
+  // 메뉴 active 상태 토글
+  function setActiveMenu(activeId) {
+    menus.forEach(menu => {
+      if (menu.id === activeId) {
+        menu.classList.add('active');
+      } else {
+        menu.classList.remove('active');
+      }
+    });
+  }
+
+  // 계절 추천 보여주기
+  document.querySelectorAll('#seasonMenu .submenu div').forEach(div => {
+    div.addEventListener('click', () => {
+      setActiveMenu('seasonMenu');
+      const season = div.dataset.season;
+      const places = recommendations[season];
+      content.innerHTML = `
+        <h2>${season} 추천 여행지</h2>
+        <div class="card">
+          <ul>
+            ${places.map(place => `<li>${place}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    });
+  });
+
+  // 지역 추천 보여주기
+  document.querySelectorAll('#regionMenu .submenu div').forEach(div => {
+    div.addEventListener('click', () => {
+      setActiveMenu('regionMenu');
+      const region = div.dataset.region;
+      const places = recommendations[region];
+      content.innerHTML = `
+        <h2>${region} 추천 여행지</h2>
+        <div class="card">
+          <ul>
+            ${places.map(place => `<li>${place}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    });
+  });
+
+  // AI 추천 여행지 보여주기 (재사용 함수)
+  function showAIRecommend() {
+    const seasons = ['봄', '여름', '가을', '겨울'];
+    const regions = ['서울', '강원', '경상', '전라', '제주'];
+
+    const randomSeason = seasons[Math.floor(Math.random() * seasons.length)];
+    const randomRegion = regions[Math.floor(Math.random() * regions.length)];
+
+    const combinedPlaces = [...recommendations[randomSeason], ...recommendations[randomRegion]];
+    const uniquePlaces = [...new Set(combinedPlaces)];
+    const displayPlaces = uniquePlaces.slice(0, 6);
+
+    content.innerHTML = `
+      <h2>AI 추천 여행지</h2>
+      <p>계절: <strong>${randomSeason}</strong>, 지역: <strong>${randomRegion}</strong> 에 어울리는 여행지를 추천해드려요.</p>
+      <div class="card">
+        <ul>
+          ${displayPlaces.map(p => `<li>${p}</li>`).join('')}
+        </ul>
+      </div>
+      <button id="refreshAI" style="margin-top:15px; padding:10px 15px; font-weight:600; border:none; background:#000; color:#fff; border-radius:8px; cursor:pointer;">다시 추천하기</button>
+    `;
+
+    document.getElementById('refreshAI').addEventListener('click', () => {
+      showAIRecommend();
+    });
+  }
+
+  // 여행사 소개
+  setActiveMenu('aboutMenu');
+showAbout();
+function showAbout() {
+  setActiveMenu('aboutMenu');
+  content.innerHTML = `
+    <h2>여행사 소개</h2>
+    <p class="intro-text">
+      안녕하세요! 저희 <strong>국내 여행 전문 여행사</strong>는 사계절 내내 아름다운 한국의 숨은 명소부터 인기 여행지까지<br/>
+      고객님의 취향과 상황에 맞춘 최적의 여행지를 추천해 드립니다.
+    </p>
+    <p>
+      🌸 <strong>봄</strong>에는 만개한 벚꽃길과 신록이 가득한 산책로,<br/>
+      ☀️ <strong>여름</strong>에는 시원한 해변과 다채로운 축제, <br/>
+      🍂 <strong>가을</strong>에는 단풍과 전통시장 탐방, <br/>
+      ❄️ <strong>겨울</strong>에는 눈꽃 축제와 스키 리조트까지.<br/>
+      모든 계절마다 특별한 추억을 만들어 드립니다.
+    </p>
+    <p>
+      📍 <strong>서울, 강원, 경상, 전라, 제주</strong> 등 다양한 지역별 특색 있는 여행지를 엄선하여<br/>
+      고객님의 일정과 취향에 맞는 맞춤형 추천을 제공합니다.<br/>
+      편리한 예약 시스템과 풍부한 여행 정보로 고객 만족을 최우선으로 생각합니다.
+    </p>
+    <p>
+      저희와 함께 소중한 추억을 만드시고, 잊지 못할 국내 여행을 경험해 보세요.<br/>
+      언제나 고객님의 즐거운 여행을 위해 최선을 다하겠습니다. 감사합니다!
+    </p>
+  `;
+}
+
+  // 예약 안내 (야놀자 새 탭)
+  function showReservation() {
+    setActiveMenu('reservationMenu');
+    content.innerHTML = `
+      <h2>예약 안내</h2>
+      <p>아래 버튼을 클릭하시면 예약 사이트 야놀자로 이동합니다.</p>
+      <a href="https://www.yanolja.com" target="_blank" rel="noopener noreferrer" style="font-weight:600; color:#000; border: 1.5px solid #000; padding: 10px 18px; border-radius:8px; display: inline-block;">야놀자 예약 바로가기</a>
+    `;
+  }
+
+  // 후기 페이지
+  function showReviewPage() {
+    setActiveMenu('reviewMenu');
+    content.innerHTML = `
+      <h2>여행 후기</h2>
+      <form id="reviewForm">
+        <label for="name">이름</label>
+        <input type="text" id="name" required placeholder="이름을 입력하세요" />
+        
+        <label for="rating">별점</label>
+        <select id="rating" required>
+          <option value="">선택하세요</option>
+          <option value="5">★★★★★ (최고)</option>
+          <option value="4">★★★★☆</option>
+          <option value="3">★★★☆☆</option>
+          <option value="2">★★☆☆☆</option>
+          <option value="1">★☆☆☆☆ (별로)</option>
+        </select>
+        
+        <label for="reviewText">후기 작성</label>
+        <textarea id="reviewText" rows="5" required placeholder="여행 후기를 작성해 주세요"></textarea>
+        
+        <button type="submit">후기 남기기</button>
+      </form>
+      <div class="reviews-list" id="reviewsList">
+        <!-- 후기 목록 -->
+      </div>
+    `;
+
+    const reviewForm = document.getElementById('reviewForm');
+    const reviewsList = document.getElementById('reviewsList');
+
+    // 후기 저장 (localStorage 활용)
+
+    function loadReviews() {
+      const saved = localStorage.getItem('travelReviews');
+      return saved ? JSON.parse(saved) : [];
+    }
+    function saveReviews(reviews) {
+      localStorage.setItem('travelReviews', JSON.stringify(reviews));
+    }
+    function renderReviews() {
+  const reviews = loadReviews();
+  if (reviews.length === 0) {
+    reviewsList.innerHTML = '<p>아직 작성된 후기가 없습니다.</p>';
+    return;
+  }
+  
+  reviewsList.innerHTML = reviews.map((r, index) => `
+    <div class="review-item">
+      <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+      <div class="author">${r.name} 님</div>
+      <div class="text">${r.text.replace(/\n/g, '<br>')}</div>
+      <button class="delete-btn" data-index="${index}" style="margin-top: 8px; background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">삭제</button>
+    </div>
+  `).join('');
+
+  // 삭제 버튼 이벤트 바인딩
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const index = parseInt(e.target.dataset.index);
+      const reviews = loadReviews();
+      reviews.splice(index, 1);
+      saveReviews(reviews);
+      
+      renderReviews();
+    });
+  });
+
+  // 전체 삭제 버튼 추가
+  reviewsList.innerHTML += `<button id="deleteAllReviewsBtn" style="margin-top: 10px; color: red; border: none; background: none; cursor: pointer;">전체 후기 삭제</button>`;
+  document.getElementById('deleteAllReviewsBtn').addEventListener('click', () => {
+    if(confirm('정말 모든 후기를 삭제하시겠습니까?')) {
+      localStorage.removeItem('travelReviews');
+      renderReviews();
+    }
+  });
+}
+
+    reviewForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = reviewForm.name.value.trim();
+      const rating = parseInt(reviewForm.rating.value);
+      const text = reviewForm.reviewText.value.trim();
+
+      if (!name || !rating || !text) return alert('모든 항목을 채워주세요.');
+
+      const reviews = loadReviews();
+      reviews.unshift({ name, rating, text });
+      saveReviews(reviews);
+
+      reviewForm.reset();
+      renderReviews();
+    });
+
+    renderReviews();
+  }
+
+  
+
+  // 메뉴 클릭 이벤트 바인딩
+  document.getElementById('aiRecommendMenu').addEventListener('click', () => {
+    setActiveMenu('aiRecommendMenu');
+    showAIRecommend();
+  });
+  document.getElementById('aboutMenu').addEventListener('click', showAbout);
+  document.getElementById('reservationMenu').addEventListener('click', showReservation);
+  document.getElementById('reviewMenu').addEventListener('click', showReviewPage);
+
+  // 초기 화면은 환영 메시지
+  setActiveMenu(null);
+
+</script>
+
+</body>
+</html>
+
